@@ -7,7 +7,10 @@
   "scripts": {
     "build": "vitepress build .",
     "dev": "vitepress dev .",
-    "preview": "vitepress preview ."
+    "preview": "vitepress preview .",
+    "docs:build": "vitepress build .",
+    "docs:dev": "vitepress dev .",
+    "docs:preview": "vitepress preview ."
   },
   "engines": {
     "node": "^20.19.0 || >=22.13.0",
