@@ -81,10 +81,10 @@ function beforeSearch(q: Record<string, any>) {
 
 | 属性 | 类型 | 默认值 | 必填 | 说明 |
 | --- | --- | --- | --- | --- |
-| `modelValue` | `Record<string, any>` | `-` | ✅ | v-model 双向绑定的 query 对象（响应式） |
+| `modelValue` | `Record&lt;string, any&gt;` | `-` | ✅ | v-model 双向绑定的 query 对象（响应式） |
 | `fields` | `SearchField[]` | `-` | ✅ | 字段配置表 |
-| `beforeSearch` | `(query: Record<string, any>) => void` | `-` |  | 搜索前置拦截：可修改 query、补充字段。 由于 modelValue 通常是 reactive 对象，直接 mutate 即可触发筛选刷新。 |
-| `defaultQuery` | `Record<string, any>` | `() => ({})` |  | 默认值：点击「重置」时合并回 modelValue。 组件内部完成重置，无需业务侧再监听 reset 事件来调 hook.reset。 |
+| `beforeSearch` | `(query: Record&lt;string, any&gt;) =&gt; void` | `-` |  | 搜索前置拦截：可修改 query、补充字段。 由于 modelValue 通常是 reactive 对象，直接 mutate 即可触发筛选刷新。 |
+| `defaultQuery` | `Record&lt;string, any&gt;` | `() =&gt; ({})` |  | 默认值：点击「重置」时合并回 modelValue。 组件内部完成重置，无需业务侧再监听 reset 事件来调 hook.reset。 |
 
 ## Events
 

@@ -108,7 +108,7 @@ tableRef.value?.getTableRef()?.clearSelection();
 | `getList` | `RePageTableLoader` | `-` | ✅ | 数据加载器：返回 { list, total } - 自动调用时机：mount / pagination 变化 - 查询条件由父组件用闭包传给 loader（见 RePageTableLoader 类型注释） - 搜索条件变化时，父组件 watch 后调 pageTableRef.value?.reload() 即可 |
 | `rowKey` | `string` | `"id"` |  | 表格行 key 字段名 |
 | `tableSize` | `union` | `"default"` |  | 表格密度 |
-| `pageSizes` | `Array` | `() => [10, 20, 50, 100]` |  | 每页大小选项 |
+| `pageSizes` | `Array` | `() =&gt; [10, 20, 50, 100]` |  | 每页大小选项 |
 | `pageSize` | `number` | `10` |  | 默认每页 |
 | `offsetBottom` | `number` | `110` |  | 自适应底部偏移 |
 | `adaptiveConfig` | `any` | `-` |  |  |

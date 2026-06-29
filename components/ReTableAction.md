@@ -69,7 +69,7 @@ defineExpose({ submit });
 
 ## 自定义弹框
 
-```ts
+```vue
 <ReTableAction
   mode="edit"
   :form-component="UserForm"
@@ -92,11 +92,11 @@ defineExpose({ submit });
 | 属性 | 类型 | 默认值 | 必填 | 说明 |
 | --- | --- | --- | --- | --- |
 | `mode` | `TableActionMode` | `-` | ✅ | 操作类型 |
-| `formComponent` | `Component` | `undefined` |  | 表单组件（仅 add / edit 使用） 必须 expose 一个 `submit(): Promise<boolean>` 方法 |
-| `deleteApi` | `TSFunctionType` | `undefined` |  | 删除 API（仅 delete 使用） 接收 row 作为入参，返回 Promise<void> 即视为成功 |
+| `formComponent` | `Component` | `undefined` |  | 表单组件（仅 add / edit 使用） 必须 expose 一个 `submit(): Promise&lt;boolean&gt;` 方法 |
+| `deleteApi` | `TSFunctionType` | `undefined` |  | 删除 API（仅 delete 使用） 接收 row 作为入参，返回 Promise&lt;void&gt; 即视为成功 |
 | `deleteLabel` | `string` | `undefined` |  | 删除确认弹框中显示的"目标"文案（仅 delete 使用） 传了直接用；不传则按 row 字段自动推断（surname+name → userName → name） |
 | `row` | `Record` | `undefined` |  | edit / delete 必传；add 忽略 |
-| `dialog` | `object` | `() => ({})` |  | 弹框配置（部分覆盖） 支持字段：title、width、top、sureBtnLoading 未传时按 mode 走 DEFAULT_DIALOG |
+| `dialog` | `object` | `() =&gt; ({})` |  | 弹框配置（部分覆盖） 支持字段：title、width、top、sureBtnLoading 未传时按 mode 走 DEFAULT_DIALOG |
 | `type` | `union` | `"primary"` |  | 按钮变体（element-plus type） |
 | `text` | `string` | `"操作"` |  | 按钮文案 |
 
