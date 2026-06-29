@@ -1,0 +1,20 @@
+{
+  "name": "xnui-docs",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "xnui 文档站（GitHub Pages）。本仓库由主仓库通过 snapshot 方式同步 docs-site/ 单个 commit（不带历史）；本仓库仅额外维护 package.json 与 GitHub Actions 部署 workflow。",
+  "scripts": {
+    "build": "vitepress build .",
+    "dev": "vitepress dev .",
+    "preview": "vitepress preview ."
+  },
+  "engines": {
+    "node": "^20.19.0 || >=22.13.0",
+    "pnpm": ">=9"
+  },
+  "devDependencies": {
+    "vitepress": "^1.6.0",
+    "vue": "^3.5.0"
+  }
+}

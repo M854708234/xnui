@@ -1,0 +1,6 @@
+# 由 GitHub Actions 构建，无需提交产物
+node_modules/
+.vitepress/cache/
+.vitepress/dist/
+*.log
+.DS_Store

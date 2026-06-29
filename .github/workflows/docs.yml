@@ -1,0 +1,85 @@
+# =============================================================================
+# GitHub Pages - xnui 文档站部署
+# -----------------------------------------------------------------------------
+# 触发：main 分支 push / workflow_dispatch 手动触发
+# 流程：install → vitepress build (. 是 docs 仓库根，承载主仓库的 docs-site/ 内容)
+#       → upload artifact → deploy
+# 部署地址：https://M854708234.github.io/xnui/
+#
+# 仓库结构（snapshot 同步后）：
+#   .                                  ← 仓库根 = 主仓库 docs-site/ 内容根
+#   ├── .vitepress/config.ts
+#   ├── index.md / components/ / composables/ / guide/ / examples/
+#   ├── package.json                   ← 本仓库维护，snapshot 时拷入
+#   └── .github/workflows/docs.yml     ← 本仓库
+#
+# 主仓库（私有）通过 pnpm docs:publish 把 docs-site/ 单 commit 推到本仓库，
+# 不带历史。本仓库只允许在根目录放 package.json / .gitignore / .github，
+# 不要在其它子目录手工修改（会被下次 snapshot 覆盖）。
+# =============================================================================
+
+name: Deploy Docs to GitHub Pages
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+# 只允许一个部署进行，避免重复构建
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 11
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      # docs-site/ 内容在仓库根，vitepress 直接读 .vitepress/config.ts
+      # base 由 config.ts 的 base 字段控制（已在主仓库 docs-site/.vitepress/config.ts
+      # 设为 "/xnui/"，snapshot 拷过来后保持不变）
+      - name: Build docs
+        run: pnpm docs:build
+
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: .vitepress/dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
