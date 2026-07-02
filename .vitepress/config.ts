@@ -71,7 +71,9 @@ export default defineConfig({
             { text: "ReSearchBar", link: "/components/ReSearchBar" },
             { text: "RePageTable", link: "/components/RePageTable" },
             { text: "ReTableAction", link: "/components/ReTableAction" },
-            { text: "RePureTableBar", link: "/components/RePureTableBar" }
+            { text: "RePureTableBar", link: "/components/RePureTableBar" },
+            { text: "DictSelect", link: "/components/DictSelect" },
+            { text: "DictTag", link: "/components/DictTag" }
           ]
         }
       ],
@@ -79,7 +81,8 @@ export default defineConfig({
         {
           text: "组合式函数",
           items: [
-            { text: "useTable", link: "/composables/useTable" }
+            { text: "useTable", link: "/composables/useTable" },
+            { text: "useDict", link: "/composables/useDict" }
           ]
         }
       ],

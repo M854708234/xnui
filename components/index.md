@@ -15,6 +15,8 @@
 | `ReSearchBar` | 通用搜索栏：配置表 + 栅格布局 + 展开收起 | [查看](/components/ReSearchBar) |
 | `RePageTable` | 通用分页表格：自管分页 / loading / 多选 / 透传 | [查看](/components/RePageTable) |
 | `ReTableAction` | 表格行操作按钮：add / edit / delete 三态内置 | [查看](/components/ReTableAction) |
+| `DictSelect` | 字典下拉选择器：按 typeNo 自动加载 + 透传 el-select | [查看](/components/DictSelect) |
+| `DictTag` | 字典标签展示：按 code 自动渲染名称 + 自动着色 | [查看](/components/DictTag) |
 
 ## 选型指引
 
@@ -25,3 +27,6 @@
 | 表格行内"编辑/删除"按钮 + 弹框 | `ReTableAction` |
 | 业务页整体框架（顶部 header + 操作区 + 内容 + 页脚） | `BaseLayout` |
 | 把"搜索栏 + 表格"联动起来（一行 useTable()） | `useTable` 组合式 |
+| 一个按字典编号自动加载的下拉 | `DictSelect` |
+| 表格里展示字典名称（启用=绿、禁用=红） | `DictTag` |
+| 在任意地方读字典 / 自定义渲染 | `useDict` 组合式 |
