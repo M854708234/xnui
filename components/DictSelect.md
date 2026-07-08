@@ -90,25 +90,24 @@ interface DictItem {
 
 ## Props
 
-| 属性         | 类型     | 默认值 | 必填 | 说明                                     |
-| ------------ | -------- | ------ | ---- | ---------------------------------------- |
-| `typeNo`     | `string` | `-`    | ✅   | 字典编号（必填）                         |
-| `modelValue` | `union`  | `-`    |      | v-model 绑定的值（itemCode），同 `value` |
-| `value`      | `union`  | `-`    |      | v-model:value 绑定的值（itemCode）       |
-| `valueName`  | `string` | `-`    |      | v-model:name 绑定的 label（itemName）    |
+| 属性 | 类型 | 默认值 | 必填 | 说明 |
+| --- | --- | --- | --- | --- |
+| `typeNo` | `string` | `-` | ✅ | 字典编号（必填） |
+| `modelValue` | `union` | `-` |  | v-model 绑定的值（itemCode），同 `value` |
+| `value` | `union` | `-` |  | v-model:value 绑定的值（itemCode） |
+| `valueName` | `string` | `-` |  | v-model:name 绑定的 label（itemName） |
 
 ## Events
 
-| 事件                | 签名                      | 说明                     |
-| ------------------- | ------------------------- | ------------------------ |
-| `update:modelValue` | `(v: any)`                | v-model 双向同步         |
-| `update:value`      | `(v: any)`                | v-model:value 同步       |
-| `update:valueName`  | `(v: string)`             | v-model:name 同步        |
-| `change`            | `(v: any, name?: string)` | 选项变化（同时给出名称） |
+| 事件 | 签名 | 说明 |
+| --- | --- | --- |
+| `update:valueName` | `()` |  |
+| `change` | `()` |  |
 
 ## Slots
 
 _无 slots_
+
 
 <!-- END: 自动生成段结束 -->
 

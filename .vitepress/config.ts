@@ -73,7 +73,8 @@ export default defineConfig({
             { text: "ReTableAction", link: "/components/ReTableAction" },
             { text: "RePureTableBar", link: "/components/RePureTableBar" },
             { text: "DictSelect", link: "/components/DictSelect" },
-            { text: "DictTag", link: "/components/DictTag" }
+            { text: "DictTag", link: "/components/DictTag" },
+            { text: "ReSelect", link: "/components/ReSelect" }
           ]
         }
       ],

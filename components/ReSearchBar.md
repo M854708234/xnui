@@ -85,6 +85,11 @@ function beforeSearch(q: Record<string, any>) {
 | `fields` | `SearchField[]` | `-` | ✅ | 字段配置表 |
 | `beforeSearch` | `(query: Record&lt;string, any&gt;) =&gt; void` | `-` |  | 搜索前置拦截：可修改 query、补充字段。 由于 modelValue 通常是 reactive 对象，直接 mutate 即可触发筛选刷新。 |
 | `defaultQuery` | `Record&lt;string, any&gt;` | `() =&gt; ({})` |  | 默认值：点击「重置」时合并回 modelValue。 组件内部完成重置，无需业务侧再监听 reset 事件来调 hook.reset。 |
+| `labelPosition` | `string` | `"right"` |  | el-form label-position，默认 "right" |
+| `labelWidth` | `string` | `"0px"` |  | el-form label-width，默认 "80px" |
+| `labelSuffix` | `string` | `""` |  | label 后缀，默认 "" |
+| `size` | `string` | `"default"` |  | el-form 整体 size |
+| `disabled` | `boolean` | `false` |  | 是否禁用所有字段，默认 false |
 
 ## Events
 

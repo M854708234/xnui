@@ -52,13 +52,13 @@ import { DictTag } from "xnui";
 
 ## Props
 
-| 属性     | 类型     | 默认值    | 必填 | 说明                                          |
-| -------- | -------- | --------- | ---- | --------------------------------------------- |
-| `typeNo` | `string` | `-`       | ✅   | 字典编号（必填）                              |
-| `code`   | `union`  | `-`       | ✅   | 字典项编码                                    |
-| `type`   | `union`  | `-`       |      | 强制指定 tag 类型；不传则按 isActive 自动着色 |
-| `effect` | `union`  | `"light"` |      | tag 主题                                      |
-| `size`   | `union`  | `"small"` |      | tag 尺寸                                      |
+| 属性 | 类型 | 默认值 | 必填 | 说明 |
+| --- | --- | --- | --- | --- |
+| `typeNo` | `string` | `-` | ✅ | 字典编号（必填） |
+| `code` | `union` | `-` | ✅ | 字典项编码 |
+| `type` | `union` | `-` |  | 强制指定 tag 类型；不传则按 isActive 自动着色 |
+| `effect` | `union` | `"light"` |  | tag 主题 |
+| `size` | `union` | `"small"` |  | tag 尺寸 |
 
 ## Events
 
@@ -67,6 +67,7 @@ _无 events_
 ## Slots
 
 _无 slots_
+
 
 <!-- END: 自动生成段结束 -->
 

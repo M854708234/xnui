@@ -27,8 +27,8 @@
 | 属性 | 类型 | 默认值 | 必填 | 说明 |
 | --- | --- | --- | --- | --- |
 | `title` | `string` | `""` |  |  |
-| `headerHeight` | `string` | `"64px"` |  |  |
-| `handleHeight` | `string` | `"60px"` |  |  |
+| `headerHeight` | `string` | `"64px"` |  | header 区高度 - 默认 "64px" - 当 ReSearchBar 等子组件在 #header 插槽中时，子组件 inject 拿到 `headerHeightRef`   并自动写入（行数变化时），BaseLayout 高度自动跟随 - 业务侧可显式传固定值覆盖 |
+| `handleHeight` | `string` | `"60px"` |  | handle 区高度 |
 
 ## Events
 
