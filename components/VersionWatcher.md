@@ -73,28 +73,29 @@ location = /index.html {
 
 ## Props
 
-| 名称                   | 类型                                      | 默认值                                           | 说明                                     |
-| ---------------------- | ----------------------------------------- | ------------------------------------------------ | ---------------------------------------- |
-| `enabled`              | `boolean`                                 | `true`                                           | 总开关，false 时整段禁用                 |
-| `checkUrl`             | `string`                                  | `"/index.html"`                                  | 探测的远端 URL                           |
-| `scriptPattern`        | `RegExp`                                  | vite 默认路径正则                                | 从 HTML 提取 hash 的正则，需带一个捕获组 |
-| `currentScriptPattern` | `RegExp`                                  | 同 `scriptPattern`                               | 兜底：当前已加载 hash 的正则             |
-| `pollMs`               | `number`                                  | `300000` (5min)                                  | 兜底定时轮询周期，`0` 表示关闭           |
-| `skipDurationMs`       | `number`                                  | `1800000` (30min)                                | 「稍后」冷却时间                         |
-| `skipKey`              | `string`                                  | `"__version_watcher_skip__"`                     | localStorage key                         |
-| `autoRefresh`          | `boolean`                                 | `false`                                          | true 时直接 reload，不弹框               |
-| `onUpdate`             | `(info: { from; to }) => void \| Promise` | -                                                | 检测到变化时触发                         |
-| `title`                | `string`                                  | "检测到新版本"                                   | 弹框标题                                 |
-| `content`              | `string`                                  | "系统已发布新版本，是否立即刷新以获取最新功能？" | 弹框正文                                 |
-| `laterText`            | `string`                                  | "稍后再说"                                       | 「稍后」按钮文案                         |
-| `refreshText`          | `string`                                  | "立即刷新"                                       | 「立即刷新」按钮文案                     |
+| 属性 | 类型 | 默认值 | 必填 | 说明 |
+| --- | --- | --- | --- | --- |
+| `enabled` | `boolean` | `true` |  | 总开关 |
+| `checkUrl` | `string` | `"/index.html"` |  | 探测的远端 URL（默认走当前站点 /index.html） |
+| `scriptPattern` | `RegExp` | `() =&gt; /\/static\/js\/index-([\w-]+)\.js/` |  | 从 HTML 中提取入口 hash 的正则，需命中第一个捕获组（hash 字符串） |
+| `currentScriptPattern` | `RegExp` | `() =&gt; /\/static\/js\/index-([\w-]+)\.js/` |  | 兜底：从当前 document 提取当前 hash 的正则（默认同 scriptPattern） |
+| `pollMs` | `number` | `5 * 60 * 1000` |  | 定时轮询（毫秒）。设为 0 表示关闭，默认 5 分钟 |
+| `skipDurationMs` | `number` | `30 * 60 * 1000` |  | 「稍后」冷却时间（毫秒），默认 30 分钟 |
+| `skipKey` | `string` | `"__version_watcher_skip__"` |  | localStorage 跳过记录的 key，便于多站并存 |
+| `autoRefresh` | `boolean` | `false` |  | true 时检测到新版本直接 reload，不弹框 |
+| `onUpdate` | `TSFunctionType` | `undefined` |  | 检测到新版本时触发；返回 Promise resolve 后再决定弹框/reload |
+| `title` | `string` | `"检测到新版本"` |  | 弹框标题 |
+| `content` | `string` | `"系统已发布新版本，是否立即刷新以获取最新功能？"` |  | 弹框正文 |
+| `laterText` | `string` | `"稍后再说"` |  | 弹框「稍后」按钮文案 |
+| `refreshText` | `string` | `"立即刷新"` |  | 弹框「立即刷新」按钮文案 |
 
 ## Events
 
-_无内置 events，使用 `defineExpose` 暴露方法：`manualCheck()`、`clearSkip()`_
+_无 events_
 
 ## Slots
 
 _无 slots_
+
 
 <!-- END: 自动生成段结束 -->

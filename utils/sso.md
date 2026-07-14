@@ -235,6 +235,9 @@ SSO 全部可配置项
 | `extraTokenParams` | `Record&lt;string, string&gt;?` |  | token 端点额外 form 参数（如 tenantId） |
 | `extraTokenHeaders` | `Record&lt;string, string&gt;?` |  | token 端点额外 header（如 __tenant） |
 | `extraAuthorizeParams` | `Record&lt;string, string&gt;?` |  | 是否在授权 URL 上额外追加 prompt=consent 等参数 |
+| `callbackPathname` | `string?` |  | 回调页 pathname（用于自动归一 path-only → hash 形式） |
+| `autoNormalizeCallback` | `boolean?` |  | 归一化时是否真的触发跳转（默认 true） 仅在 normalize 阶段为 false 时 handleCallback 不会自动跳，但代码逻辑不变。 业务侧一般不需要改。 |
+| `callbackNormalizeMode` | `"replace" \| "assign"?` |  | 归一化时跳转方式：默认 "replace"（不污染 history） 可改 "assign" |
 
 ### 存储适配器
 
@@ -341,7 +344,7 @@ Token 写入 / 读取 / 清除接口 与 src/utils/auth.ts 的 setToken / getTok
 | `buildAuthorizeUrl` | `buildAuthorizeUrl(extra?: Record&lt;string, string&gt;): string` | 构造授权中心完整 URL（含 state），并自动持久化 state 业务侧可拿到 URL 自行处理（埋点 / iframe 等），不一定要跳转 |
 | `redirectToAuthorize` | `redirectToAuthorize(extra?: Record&lt;string, string&gt;): void` | 直接跳转授权中心（一行完成第 1 步） |
 | `exchangeToken` | `exchangeToken(code: string, extra?: Record&lt;string, string&gt;): Promise&lt;{ token: TokenResponse; raw: unknown }&gt;` | 用 code 换取 access_token 返回原始响应 + 标准化后的 TokenResponse，业务侧完全控制写 token 的方式 |
-| `handleCallback` | `handleCallback(opts?: { cbUrl?: string; tokenExtra?: Record&lt;string, string&gt; }): Promise&lt;...&gt;` | 回调页 `onMounted` 里直接调用：解析 code / state → 校验 → 换 token → 写 token → 跳转 |
+| `handleCallback` | `handleCallback(opts?: { cbUrl?: string; tokenExtra?: Record&lt;string, string&gt;; }): Promise&lt;...&gt;` | 回调页 `onMounted` 里直接调用：解析 code / state → 校验 → 换 token → 写 token → 跳转 |
 | `logout` | `logout(): void` | 主动登出（清 token + 清 state） |
 | `isAuthenticated` | `isAuthenticated(): boolean` | 是否已登录（业务侧可自定：有 token 就算） |
 
