@@ -31,6 +31,7 @@ export default defineConfig({
       { text: "指南", link: "/guide/getting-started", activeMatch: "/guide/" },
       { text: "组件", link: "/components/", activeMatch: "/components/" },
       { text: "组合式", link: "/composables/useTable", activeMatch: "/composables/" },
+      { text: "工具类", link: "/utils/sso", activeMatch: "/utils/" },
       { text: "示例", link: "/examples/user-manage", activeMatch: "/examples/" }
     ],
 
@@ -84,6 +85,14 @@ export default defineConfig({
           items: [
             { text: "useTable", link: "/composables/useTable" },
             { text: "useDict", link: "/composables/useDict" }
+          ]
+        }
+      ],
+      "/utils/": [
+        {
+          text: "通用工具类（纯 JS）",
+          items: [
+            { text: "sso 统一登录授权", link: "/utils/sso" }
           ]
         }
       ],

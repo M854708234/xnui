@@ -52,6 +52,83 @@ provide(Symbol.for("xnui:fetch"), async ({ url, method, params }) => {
 
 弹层滚动到底部时,自动拉下一页数据,直到 `total` 字段达到上限。
 
+## 两种分页语义:`page` 与 `offset`
+
+`paginationType` 控制分页参数语义,适配不同后端接口:
+
+| `paginationType` | 适用场景                              | `pageField` 含义           | 真实请求示例 (pageSize=20)             |
+| ---------------- | ------------------------------------- | -------------------------- | -------------------------------------- |
+| `"page"`(默认)   | 页码风格接口(`pageNum=1, pageNum=2…`) | 页码,从 **1** 开始         | `{ pageNum: 1, pageSize: 20 }`         |
+| `"offset"`       | 偏移量风格接口(`skipCount=20`)        | 跳过条数 = page × pageSize | `{ skipCount: 0, maxResultCount: 20 }` |
+
+### 典型场景:ABP / `skipCount + maxResultCount` 接口
+
+```vue
+<template>
+  <ReSelect
+    v-model:value="roleId"
+    v-model:value-name="roleName"
+    api="/api/identity/roles"
+    pagination-type="offset"
+    page-field="skipCount"
+    size-field="maxResultCount"
+    key-code="keyCode"
+    :page-size="20"
+  />
+</template>
+```
+
+| 加载阶段    | 请求参数                                             |
+| ----------- | ---------------------------------------------------- |
+| 初次 / 搜索 | `{ keyCode: '', skipCount: 0, maxResultCount: 20 }`  |
+| 滚动第 2 页 | `{ keyCode: '', skipCount: 20, maxResultCount: 20 }` |
+| 滚动第 3 页 | `{ keyCode: '', skipCount: 40, maxResultCount: 20 }` |
+
+内部统一使用 **0 基 page** 计算 `pageField`,只会在最终拼接请求参数时按 `paginationType` 区分：
+
+- `"page"` → 拼 `page + 1`
+- `"offset"` → 拼 `page * pageSize`
+
+> 即使某一页后端少返回了几条,下一轮仍能正确推进(用 `page * pageSize` 而不是「已加载条数」,避免跳数据)。
+
+## 搜索框输入触发远端搜索
+
+`keyCode` 是搜索字段名——业务侧在输入框敲字后,组件会把查询词按 `keyCode` 作为 key 提交给后端,**自动远端搜索**。
+
+- 默认 `keyCode="keyCode"` → 请求参数为 `{ keyCode: 'xxx' }`
+- 后端按 `?keyCode=xxx` 模糊匹配 → 接口返回匹配项
+- el-select `filterable` + `remote` 自动启用,无需业务自己监听
+
+```vue
+<template>
+  <ReSelect
+    v-model:value="userId"
+    v-model:value-name="userName"
+    api="/api/users/page"
+    key-code="name"  <!-- 输入"张"→请求 ?name=张 -->
+    :paginated="true"
+  />
+</template>
+```
+
+**手动触发搜索(ref):**
+
+```vue
+<script setup>
+import { ref, getCurrentInstance } from "vue";
+
+const rsRef = ref();
+function trigger() {
+  // 业务侧主动按某关键词拉数据
+  rsRef.value?.search("张三");
+}
+</script>
+
+<template>
+  <ReSelect ref="rsRef" api="/api/users" />
+</template>
+```
+
 ## 自定义字段映射
 
 接口返回的字段名不一定是 `label` / `value`,可通过 `props` 自定义:
@@ -197,43 +274,45 @@ app.provide(Symbol.for("xnui:fetch"), async ({ url, method, params }) => {
 | `interceptorFun` | `() => Promise<{bool: boolean; message: string}> \| {bool: boolean; message: string}` |
 | `handleRes`      | `(res: any) => any`                                                                   |
 | `defaultOption`  | `{label: string; value: any} \| null`                                                 |
+| `keyCode`        | `string`                                                                              |
 
 <!-- BEGIN: 由 scripts/gen-docs.ts 自动生成，请勿手写此段 -->
 
 ## Props
 
-| 属性 | 类型 | 默认值 | 必填 | 说明 |
-| --- | --- | --- | --- | --- |
-| `value` | `any` | `-` |  | v-model:value 双向绑定 |
-| `valueName` | `string` | `""` |  | v-model:name 双向绑定的展示文本 |
-| `api` | `string` | `""` |  | 接口地址 |
-| `params` | `Record` | `() =&gt; ({})` |  | 接口参数 |
-| `props` | `SelectOptionProps` | `() =&gt; ({ label: "label", value: "value", key: "value" })` |  | 下拉项字段映射 |
-| `otherQuery` | `Record` | `() =&gt; ({})` |  | 额外的查询参数（追加到 params 上） |
-| `showType` | `SelectShowType` | `""` |  | 显示形式 |
-| `interceptorFun` | `TSFunctionType` | `-` |  | 请求前置拦截器（异步） - 发起请求前调用 - 返回 { bool: true, message: '' } → 继续请求 - 返回 { bool: false, message: '原因' } → 终止 + ElMessage 报错 |
-| `handleRes` | `TSFunctionType` | `-` |  | 处理接口返回数据 |
-| `defaultOption` | `union` | `null` |  | 回填项（编辑场景专用） - 编辑打开表单时,接口未返回前先展示该回填值,避免 el-select 显示空白 - 接口返回后自动从结果中去重:   · echo.value 已在列表里 → 跳过,不重复显示   · echo.value 不在列表里（筛选条件找不到）→ 置顶保留 |
-| `pageField` | `string` | `"pageNum"` |  | 分页返回的页码字段 |
-| `sizeField` | `string` | `"pageSize"` |  | 分页返回的每页大小字段 |
-| `totalField` | `string` | `"total"` |  | 分页返回的总数字段 |
-| `listField` | `string` | `"list"` |  | 分页返回的列表字段 |
-| `pageSize` | `number` | `20` |  | 每页大小 |
-| `paginated` | `boolean` | `true` |  | 是否分页（true: 滚动加载更多；false: 全量加载） |
-| `disabled` | `boolean` | `-` |  | 是否禁用 |
+| 属性             | 类型                | 默认值                                                        | 必填 | 说明                                                                                                                                                                                                                                                    |
+| ---------------- | ------------------- | ------------------------------------------------------------- | ---- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `value`          | `any`               | `-`                                                           |      | v-model:value 双向绑定                                                                                                                                                                                                                                  |
+| `valueName`      | `string`            | `""`                                                          |      | v-model:name 双向绑定的展示文本                                                                                                                                                                                                                         |
+| `api`            | `string`            | `""`                                                          |      | 接口地址                                                                                                                                                                                                                                                |
+| `props`          | `SelectOptionProps` | `() =&gt; ({ label: "label", value: "value", key: "value" })` |      | 数据项字段映射 - label: 用于展示的字段名 - value: 用于取值的字段名（同时作为 v-model 的值） - key: 可选。v-model 实际写入的字段（默认与 value 相同）                                                                                                    |
+| `params`         | `Record`            | `() =&gt; ({})`                                               |      | 静态请求参数（每次请求都会带上）                                                                                                                                                                                                                        |
+| `otherQuery`     | `Record`            | `() =&gt; ({})`                                               |      | 动态请求参数（变化时自动重新拉取,深度监听）                                                                                                                                                                                                             |
+| `showType`       | `SelectShowType`    | `""`                                                          |      | 显示形式                                                                                                                                                                                                                                                |
+| `interceptorFun` | `TSFunctionType`    | `-`                                                           |      | 请求前置拦截器（异步） - 发起请求前调用 - 返回 { bool: true, message: '' } → 继续请求 - 返回 { bool: false, message: '原因' } → 终止 + ElMessage 报错                                                                                                   |
+| `handleRes`      | `TSFunctionType`    | `-`                                                           |      | 处理接口返回数据                                                                                                                                                                                                                                        |
+| `defaultOption`  | `union`             | `null`                                                        |      | 回填项（编辑场景专用） - 编辑打开表单时,接口未返回前先展示该回填值,避免 el-select 显示空白 - 接口返回后自动从结果中去重: · echo.value 已在列表里 → 跳过,不重复显示 · echo.value 不在列表里（筛选条件找不到）→ 置顶保留                                  |
+| `pageField`      | `string`            | `"pageNum"`                                                   |      | 分页返回的页码字段                                                                                                                                                                                                                                      |
+| `sizeField`      | `string`            | `"pageSize"`                                                  |      | 分页返回的每页大小字段                                                                                                                                                                                                                                  |
+| `totalField`     | `string`            | `"total"`                                                     |      | 分页返回的总数字段                                                                                                                                                                                                                                      |
+| `listField`      | `string`            | `"list"`                                                      |      | 分页返回的列表字段                                                                                                                                                                                                                                      |
+| `keyCode`        | `string`            | `"keyCode"`                                                   |      | 搜索框输入提交的查询参数字段名（默认 "keyCode"）                                                                                                                                                                                                        |
+| `pageSize`       | `number`            | `20`                                                          |      | 每页大小                                                                                                                                                                                                                                                |
+| `paginated`      | `boolean`           | `true`                                                        |      | 是否分页（true: 滚动加载更多；false: 全量加载）                                                                                                                                                                                                         |
+| `paginationType` | `union`             | `"page"`                                                      |      | 分页语义类型 - "page"（默认）: 页码模式。请求参数 pageField 为页码,从 1 开始（如 pageNum=1） - "offset": 偏移量模式。请求参数 pageField 为跳过条数 = page \* pageSize（如 skipCount=20） 注意：内部统一使用 0 基 page 计算,仅在最终拼接请求参数时区分。 |
+| `disabled`       | `boolean`           | `-`                                                           |      | 是否禁用                                                                                                                                                                                                                                                |
 
 ## Events
 
-| 事件 | 签名 | 说明 |
-| --- | --- | --- |
-| `update:valueName` | `()` |  |
-| `change` | `()` |  |
-| `load-more` | `()` |  |
-| `loaded` | `()` |  |
+| 事件               | 签名 | 说明 |
+| ------------------ | ---- | ---- |
+| `update:valueName` | `()` |      |
+| `change`           | `()` |      |
+| `load-more`        | `()` |      |
+| `loaded`           | `()` |      |
 
 ## Slots
 
 _无 slots_
-
 
 <!-- END: 自动生成段结束 -->
