@@ -14,6 +14,12 @@
 ## 三步流程
 
 ```
+0. (自动) 归一回跳 URL（hash 路由项目）
+   授权中心 302 → /callback?code=xxx&state=xxx（path-only）
+                       │
+                       ▼  normalizeCallbackUrl() (handleCallback 入口自动触发)
+   /#/callback?code=xxx&state=xxx（hash 形式,Vue Router 接管）
+
 1. redirectToAuthorize()
    GET authorizeUrl
        ?response_type=code
@@ -25,6 +31,7 @@
 2. 授权中心 302 → redirect_uri?code=...&state=...
 
 3. (回调页 onMounted) handleCallback()
+       → 步骤 0 自动归一（如未关闭）
        → 校验 state
        → exchangeToken() POST tokenUrl  (grant_type=PortalCodeTokenExtensionGrant)
        → tokenAdapter.setToken(token)
@@ -89,7 +96,8 @@ onMounted(async () => {
 ```bash
 # 在 xnui 库中构建独立 JS 产物
 pnpm build:sso
-# 产物：dist-sso/xnui-sso.iife.js   dist-sso/xnui-sso.esm.js
+# 产物：dist-sso/index.{js,cjs,d.ts}    （npm subpath import 用）
+#       dist-sso/xnui-sso.iife.js       （<script> 引用，挂 window.XnuiSso）
 ```
 
 业务侧直接 `<script>` 引用：
@@ -205,6 +213,73 @@ class MySso extends UnifiedSsoAuth {
     localStorage.setItem("my-user-info", JSON.stringify(token));
   }
 }
+```
+
+## 路径归一（hash 路由项目必看）
+
+OAuth2 授权中心 302 跳到 `redirect_uri` 时通常只带 query，不带 hash：
+
+```
+/callback?code=xxx&state=xxx
+```
+
+而 Vue Router **hash 模式** 期望：
+
+```
+/#/callback?code=xxx&state=xxx
+```
+
+xnui/sso 在 `handleCallback()` 入口会自动检测当前 URL，如果命中 `callbackPathname`（默认 `/callback`）且 `location.hash` 还未对齐，会用 `location.replace()` 301 一次到 hash 形式，业务侧零感知。
+
+### 关闭自动归一
+
+```ts
+// history 路由项目（不需要归一）
+const sso = createSsoAuth({
+  ...,
+  callbackPathname: ""           // 关闭
+});
+
+// 或
+const sso = createSsoAuth({
+  ...,
+  autoNormalizeCallback: false
+});
+```
+
+### 手动调用（在 main.ts 顶部）
+
+如果想在 `handleCallback` 之前同步归一（不依赖 Vite import 提升），可以直接在 main.ts 顶部调用：
+
+```ts
+// main.ts
+import { normalizeCallbackUrl } from "xnui/sso";
+normalizeCallbackUrl();
+```
+
+或 `<script>` 标签引用 IIFE 产物：
+
+```html
+<script src="/static/xnui-sso.iife.js"></script>
+<script>
+  XnuiSso.normalizeCallbackUrl();
+</script>
+```
+
+### API
+
+```ts
+// 单参：传 pathname 字符串
+normalizeCallbackUrl("/callback"); // 兼容旧调用
+
+// 多参：传对象
+normalizeCallbackUrl({
+  pathname: "/auth/callback", // 自定义回调路径
+  mode: "replace", // 'replace' | 'assign'
+});
+
+// 仅检测，不跳转
+isPathOnlyCallbackUrl(window.location, "/callback"); // true / false
 ```
 
 <!-- BEGIN: 由 scripts/gen-sso-docs.ts 自动生成，请勿手写此段 -->
@@ -434,12 +509,13 @@ Cookie TokenAdapter（零依赖，自己序列化） - 与 src/utils/auth.ts 中
 ```
 src/sso/
 ├── README.md          # 本文档
-├── index.ts           # xnui 库 sso 子路径出口
+├── index.ts           # xnui 库 sso subpath 出口
 └── src/
     ├── types.ts         # SsoConfig / SsoStorage / SsoRequest / SsoHooks / TokenResponse
     ├── storage.ts       # localStorage / sessionStorage / cookie / memory
     ├── request.ts       # 默认 fetch + URLSearchParams + SsoHttpError
     ├── auth-adapter.ts  # TokenAdapter + 3 个工厂（auth.ts / 默认 / cookie）
-    ├── iife-entry.ts    # 浏览器 <script> 入口（挂 window.XnuiSso）
+    ├── normalize.ts     # normalizeCallbackUrl / isPathOnlyCallbackUrl  (path-only → hash 归一)
+    ├── iife-entry.ts    # IIFE 入口：window.XnuiSso
     └── index.ts         # UnifiedSsoAuth + createSsoAuth + 重导出
 ```
