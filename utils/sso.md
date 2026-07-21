@@ -126,7 +126,7 @@ pnpm build:sso
 | `tokenUrl`             | `string`                | ✓    | —                                                | 第 2 步 POST token 端点  |
 | `clientId`             | `string`                | ✓    | —                                                | OAuth2 client_id         |
 | `redirectUri`          | `string`                | ✓    | —                                                | 业务回调地址             |
-| `scope`                | `string`                | ✓    | —                                                | 第 1 / 第 2 步都会带上   |
+| `scope`                | `string`                |      | —                                                | 授权 scope，第 1 / 第 2 步都会带上。OAuth2 §3.3 可选：不传或为空时授权服务端用默认 scope |
 | `grantType`            | `string`                |      | `"PortalCodeTokenExtensionGrant"`                | 第 2 步 grant_type       |
 | `responseType`         | `string`                |      | `"code"`                                         | 第 1 步 response_type    |
 | `generateState`        | `() => string`          |      | `Math.random().toString(36).substring(2,12) × 2` | state 生成函数           |
@@ -299,8 +299,12 @@ SSO 全部可配置项
 | `tokenUrl` | `string` | ✓ | 第 2 步：token 交换地址（POST），如 https://crm-test.xinning.com.cn/Portal_GC_Host/connect/token |
 | `clientId` | `string` | ✓ | OAuth2 client_id |
 | `redirectUri` | `string` | ✓ | 业务回调页地址，必须与 authorizeUrl 里 redirect_uri 一致 |
-| `scope` | `string` | ✓ | 授权 scope，第 1 / 第 2 步都会带上 |
+| `scope` | `string?` |  | 授权 scope，第 1 / 第 2 步都会带上。 OAuth2 RFC 6749 §3.3 标准下为可选项： - 不传或为空：URL 不会带 scope 参数，由授权服务端用默认 scope - 多个 scope 用空格分隔（如 "openid profile email"） |
 | `grantType` | `string?` |  | 第 2 步 grant_type，默认 "PortalCodeTokenExtensionGrant"（业务可覆盖） |
+| `codeParam` | `string?` |  | token 接口里携带授权码的字段名。 - 默认 "code"（OAuth2 RFC 6749 §4.1.3 标准字段名） - 旧 ABP Portal 系列服务端用 "PortalCode"，迁移后端时可显式覆盖 |
+| `sendScopeInToken` | `"auto" \| "always" \| "never"?` |  | 是否在 token 接口携带 scope 参数。 - "auto"（默认）：scope 非空时带,空串/未配时省略 - "always": 强制带（即使空,OAuth 服务通常忽略空值） - "never": 永远不带（适合某些早期 ABP Portal 实现） |
+| `endSessionEndpoint` | `string?` |  | 授权端登出端点 URL。logout() 调用时会跳到该地址并带 post_logout_redirect_uri。 - 不传：默认用 `${authorizeUrl}/connect/endsession` - 显式传：业务侧自定义（如 OIDC: `https://idp.example.com/oidc/logout`） |
+| `postLogoutRedirectUri` | `string?` |  | 登出后回跳地址。logout() 调用时拼到 endSessionEndpoint 的 query。 - 不传：用 `window.location.origin + window.location.pathname`（首页 URL,不带 hash/query） - 显式传：业务侧指定完整 URL |
 | `responseType` | `string?` |  | response_type，默认 "code" |
 | `generateState` | `() =&gt; string?` |  | state 生成函数，默认 Math.random().toString(36).substring(2,12) × 2 |
 | `stateKey` | `string?` |  | 存储 state 的 key（localStorage / cookie），默认 "__sso_state" |
@@ -420,7 +424,7 @@ Token 写入 / 读取 / 清除接口 与 src/utils/auth.ts 的 setToken / getTok
 | `redirectToAuthorize` | `redirectToAuthorize(extra?: Record&lt;string, string&gt;): void` | 直接跳转授权中心（一行完成第 1 步） |
 | `exchangeToken` | `exchangeToken(code: string, extra?: Record&lt;string, string&gt;): Promise&lt;{ token: TokenResponse; raw: unknown }&gt;` | 用 code 换取 access_token 返回原始响应 + 标准化后的 TokenResponse，业务侧完全控制写 token 的方式 |
 | `handleCallback` | `handleCallback(opts?: { cbUrl?: string; tokenExtra?: Record&lt;string, string&gt;; }): Promise&lt;...&gt;` | 回调页 `onMounted` 里直接调用：解析 code / state → 校验 → 换 token → 写 token → 跳转 |
-| `logout` | `logout(): void` | 主动登出（清 token + 清 state） |
+| `logout` | `logout(opts?: { redirect?: boolean \| string }): void` | 主动登出（清 token + 清 state + 跳授权中心登出端点）。 |
 | `isAuthenticated` | `isAuthenticated(): boolean` | 是否已登录（业务侧可自定：有 token 就算） |
 
 ### 工厂函数
