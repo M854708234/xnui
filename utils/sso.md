@@ -1,4 +1,4 @@
-# sso — 统一登录授权
+# xnsso — 统一登录授权
 
 > xnui 库内置的 OAuth2 统一登录工具类（**纯 JS，零运行时依赖**）
 
@@ -91,7 +91,65 @@ onMounted(async () => {
 </script>
 ```
 
-### 3. 独立打包使用（不引 xnui 整个库）
+### 3. 登出场景
+
+默认 `sso.logout()` 会：
+
+1. 清本地 token（`tokenAdapter.removeToken`）和 state
+2. 跳到授权端的 `endsession` 端点，并带 `post_logout_redirect_uri` 回跳到首页
+
+```vue
+<!-- src/views/profile/index.vue 里的"退出登录"按钮 -->
+<script setup lang="ts">
+import { createSsoAuth } from "xnui/sso";
+
+const sso = createSsoAuth({
+  /* 同登录入口的 config */
+});
+
+function onLogout() {
+  // 默认行为：清 token + 跳授权中心 endsession,回跳到当前页 origin + pathname
+  sso.logout();
+}
+</script>
+
+<template>
+  <button @click="onLogout">退出登录</button>
+</template>
+```
+
+#### 控制登出行为
+
+```ts
+// 1) 只清本地、不跳授权中心
+sso.logout({ redirect: false });
+
+// 2) 自定义回跳地址
+sso.logout({ redirect: "/after-logout" });
+
+// 3) 跨域回跳
+sso.logout({ redirect: "https://other.example.com/login" });
+
+// 4) 自定义 endsession 路径（OIDC 等）
+createSsoAuth({
+  authorizeUrl,
+  tokenUrl,
+  clientId,
+  redirectUri,
+  scope,
+  endSessionEndpoint: "https://idp.example.com/oidc/logout",
+  postLogoutRedirectUri: "https://app.example.com/logged-out",
+});
+```
+
+默认跳转 URL 形如：
+
+```
+https://crm-test.xinning.com.cn/Portal_GC_Host/connect/endsession
+  ?post_logout_redirect_uri=https%3A%2F%2Fapp.example.com%2F
+```
+
+### 4. 独立打包使用（不引 xnui 整个库）
 
 ```bash
 # 在 xnui 库中构建独立 JS 产物
@@ -120,23 +178,23 @@ pnpm build:sso
 
 #### `SsoConfig`
 
-| 字段                   | 类型                    | 必填 | 默认                                             | 说明                     |
-| ---------------------- | ----------------------- | ---- | ------------------------------------------------ | ------------------------ |
-| `authorizeUrl`         | `string`                | ✓    | —                                                | 第 1 步 GET 授权中心地址 |
-| `tokenUrl`             | `string`                | ✓    | —                                                | 第 2 步 POST token 端点  |
-| `clientId`             | `string`                | ✓    | —                                                | OAuth2 client_id         |
-| `redirectUri`          | `string`                | ✓    | —                                                | 业务回调地址             |
+| 字段                   | 类型                    | 必填 | 默认                                             | 说明                                                                                     |
+| ---------------------- | ----------------------- | ---- | ------------------------------------------------ | ---------------------------------------------------------------------------------------- |
+| `authorizeUrl`         | `string`                | ✓    | —                                                | 第 1 步 GET 授权中心地址                                                                 |
+| `tokenUrl`             | `string`                | ✓    | —                                                | 第 2 步 POST token 端点                                                                  |
+| `clientId`             | `string`                | ✓    | —                                                | OAuth2 client_id                                                                         |
+| `redirectUri`          | `string`                | ✓    | —                                                | 业务回调地址                                                                             |
 | `scope`                | `string`                |      | —                                                | 授权 scope，第 1 / 第 2 步都会带上。OAuth2 §3.3 可选：不传或为空时授权服务端用默认 scope |
-| `grantType`            | `string`                |      | `"PortalCodeTokenExtensionGrant"`                | 第 2 步 grant_type       |
-| `responseType`         | `string`                |      | `"code"`                                         | 第 1 步 response_type    |
-| `generateState`        | `() => string`          |      | `Math.random().toString(36).substring(2,12) × 2` | state 生成函数           |
-| `stateKey`             | `string`                |      | `"__sso_state"`                                  | state 存储 key           |
-| `storage`              | `SsoStorage`            |      | localStorage                                     | state 存储适配器         |
-| `request`              | `SsoRequest`            |      | fetch                                            | token 端点请求实现       |
-| `hooks`                | `SsoHooks`              |      | —                                                | 业务侧钩子               |
-| `extraTokenParams`     | `Record<string,string>` |      | `{}`                                             | token 接口额外 form 参数 |
-| `extraTokenHeaders`    | `Record<string,string>` |      | `{}`                                             | token 接口额外 header    |
-| `extraAuthorizeParams` | `Record<string,string>` |      | `{}`                                             | authorize URL 额外参数   |
+| `grantType`            | `string`                |      | `"PortalCodeTokenExtensionGrant"`                | 第 2 步 grant_type                                                                       |
+| `responseType`         | `string`                |      | `"code"`                                         | 第 1 步 response_type                                                                    |
+| `generateState`        | `() => string`          |      | `Math.random().toString(36).substring(2,12) × 2` | state 生成函数                                                                           |
+| `stateKey`             | `string`                |      | `"__sso_state"`                                  | state 存储 key                                                                           |
+| `storage`              | `SsoStorage`            |      | localStorage                                     | state 存储适配器                                                                         |
+| `request`              | `SsoRequest`            |      | fetch                                            | token 端点请求实现                                                                       |
+| `hooks`                | `SsoHooks`              |      | —                                                | 业务侧钩子                                                                               |
+| `extraTokenParams`     | `Record<string,string>` |      | `{}`                                             | token 接口额外 form 参数                                                                 |
+| `extraTokenHeaders`    | `Record<string,string>` |      | `{}`                                             | token 接口额外 header                                                                    |
+| `extraAuthorizeParams` | `Record<string,string>` |      | `{}`                                             | authorize URL 额外参数                                                                   |
 
 #### `TokenAdapter`
 
